@@ -24,8 +24,10 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class SecurityServiceTest {
 
+    @Mock
     private SecurityService securityService;
 
+    @Mock
     private Sensor sensor;
 
 
@@ -75,6 +77,23 @@ public class SecurityServiceTest {
         securityService.addSensor(sensor);
         assertNotNull(securityService.getSensors());
         securityService.removeSensor(sensor);
+    }
+
+    @Test
+    void TestPendingAlarmSensorNotActivated_setNoAlarm() {
+        when(securityRepository.getAlarmStatus()).thenReturn(AlarmStatus.PENDING_ALARM);
+        securityService.changeSensorActivationStatus(sensor);
+
+        verify(securityRepository, times(1)).setAlarmStatus(AlarmStatus.NO_ALARM);
+    }
+
+    @Test
+    void TestAlarmStateAndDisarmedStatus_SetPendingAlarm() {
+        when(securityRepository.getArmingStatus()).thenReturn(ArmingStatus.DISARMED);
+        when(securityRepository.getAlarmStatus()).thenReturn(AlarmStatus.ALARM);
+        securityService.changeSensorActivationStatus(sensor);
+
+        verify(securityRepository, times(1)).setAlarmStatus(AlarmStatus.PENDING_ALARM);
     }
 
 
